@@ -13,5 +13,22 @@
             "fussatok bolondok",
             "fussatok bolondok"
         ]
+    },
+    {
+        "name": "user6",
+        "password": "user6",
+        "todos": [
+            "jesszusom",
+            "toddoooooo",
+            "rrr",
+            "fff",
+            "gggffrfr",
+            "ffff"
+        ]
+    },
+    {
+        "name": "user8",
+        "password": "user8",
+        "todos": []
     }
 ]

@@ -10,6 +10,11 @@ app.use(express.json())
 
 const users = require('./users.json')
 
+
+const mySessionStorage = {};
+
+
+
 app.post('/api/signup', (req, res) => {
     if (!req.body.name || !req.body.password) {
         return res.status(400).json("Missing credentials")
@@ -30,12 +35,12 @@ app.post('/api/signup', (req, res) => {
 })
 
 app.post('/api/todo', (req, res) => {
-    const autoHead = req.header('authorization');
-    if (!autoHead) res.sendStatus(401)
-    const userName = autoHead.split(':::')[0]
-    const password = autoHead.split(':::')[1]
+    const sessionId = req.header('authorization');
+    if (!sessionId) return res.sendStatus(401)
+    // const userName = autoHead.split(':::')[0]
+    // const password = autoHead.split(':::')[1]
     
-    const user = users.find(user => user.name === userName && user.password === password)
+    const user = mySessionStorage[sessionId]
     if (!user) return res.sendStatus(401);
 
     const todoMess = req.body.todo
@@ -47,6 +52,18 @@ app.post('/api/todo', (req, res) => {
 })
 
 app.get('/api/todo', (req, res) => {
+    const sessionId = req.header('authorization');
+    if (!sessionId) return res.sendStatus(401)
+    // const userName = autoHead.split(':::')[0]
+    // const password = autoHead.split(':::')[1]
+    
+    const user = mySessionStorage[sessionId]
+    if (!user) return res.sendStatus(401);
+
+    res.json(user.todos)   
+})
+
+app.post('/api/login', (req, res) => {
     const autoHead = req.header('authorization');
     if (!autoHead) res.sendStatus(401)
     const userName = autoHead.split(':::')[0]
@@ -54,8 +71,26 @@ app.get('/api/todo', (req, res) => {
     
     const user = users.find(user => user.name === userName && user.password === password)
     if (!user) return res.sendStatus(401);
-    
-    res.json(user.todos)   
+
+    // res.sendStatus(200)
+
+    const sessionId = Math.random().toString();
+    mySessionStorage[sessionId] = user;
+    console.log(mySessionStorage)
+
+    setTimeout(() => {
+        console.log("Session ended")
+        delete mySessionStorage[sessionId];
+    }, 30*1000);
+
+    res.json(sessionId)
+})
+
+app.delete("/api/logout", (req,res) => {
+    const sessionId = req.header('authorization')
+    if (!sessionId) return res.sendStatus(401);
+    delete mySessionStorage[sessionId]
+    res.sendStatus(200)
 })
 
 app.listen(port, () => {
